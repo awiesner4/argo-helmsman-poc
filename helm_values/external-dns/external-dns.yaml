@@ -1,0 +1,42 @@
+provider: aws
+aws:
+  zoneType: public
+  region: us-east-2
+txtOwnerId: kops.infra.devops.starburstdata.net
+txtPrefix: kops.infra.devops.starburstdata.net
+zoneIdFilters:
+  - Z07551373ESKOMLVLPQC9
+rbac:
+  create: true
+# This allow external-dns to delete entries as well
+policy: sync
+
+image:
+  pullSecrets:
+    - name: dockercredentials
+
+interval: "60m"
+logLevel: info
+triggerLoopOnEvent: true
+replicas: 3
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop: ["ALL"]
+podSecurityContext:
+  fsGroup: 1001
+  runAsUser: 1001
+  runAsNonRoot: true
+metrics:
+  enabled: true
+  ## Metrics exporter pod Annotation and Labels
+  podAnnotations:
+     prometheus.io/scrape: "true"
+     prometheus.io/port: "7979"
+  ## Prometheus Operator ServiceMonitor configuration
+  serviceMonitor:
+    enabled: false
+    namespace: observability
+

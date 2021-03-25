@@ -1,0 +1,106 @@
+# version: v3.4.0
+
+context: test-infra   # defaults to "default" if not provided
+
+metadata:
+  org: "starburstdata"
+  maintainer: "k8s-admin (me@example.com)"
+  description: "example Desired State File for demo purposes."
+
+settings:
+  kubeContext: "kops.infra.devops.starburstdata.net"
+  globalMaxHistory: 5
+
+helmRepos:
+  ingress-nginx: "https://kubernetes.github.io/ingress-nginx"
+  external-dns: "https://charts.bitnami.com/bitnami"
+  cert-manager: "https://charts.jetstack.io"
+  appscode: "https://charts.appscode.com/stable/"
+  hashicorp: "https://helm.releases.hashicorp.com"
+  autoscaler: "https://kubernetes.github.io/autoscaler"
+
+namespaces:
+  lab:
+    protected: false
+  ingress-nginx:
+    protected: false
+  external-dns:
+    protected: false
+  kubed:
+    protected: false
+  cert-manager:
+    protected: false
+  vault:
+    protected: false
+    
+apps:
+    autoscaler:
+      namespace: "kube-system"
+      enabled: true
+      chart: "autoscaler/cluster-autoscaler"
+      version: "9.3.0"
+      valuesFile: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/autoscaler/autoscaler.yaml"
+      priority: -4
+      test: false
+      protected: false
+      wait: true
+      hooks:
+        preInstall: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/autoscaler/priority.yaml"
+    vault:
+      namespace: "vault"
+      enabled: true
+      chart: "hashicorp/vault"
+      version: "0.9.1"
+      valuesFile: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/vault/vault.yaml"
+      priority: 0
+      test: false
+      protected: false
+      wait: true
+      
+    kubed:
+      namespace: "kubed"
+      enabled: true
+      chart: "appscode/kubed"
+      version: "v0.12.0"
+      valuesFile: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/kubed/kubed.yaml"
+      priority: -3
+      test: false
+      protected: false
+      wait: true
+      hooks:
+        preInstall: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/kubed/dockercredentials.yaml"
+        
+    nginx:
+      namespace: "ingress-nginx"
+      enabled: true
+      chart: "ingress-nginx/ingress-nginx"
+      version: "3.24.0"
+      valuesFile: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/ingress-nginx/ingress-nginx.yaml"
+      priority: -1
+      test: false
+      protected: false
+      wait: true
+
+    external-dns:
+      namespace: "external-dns"
+      enabled: true
+      chart: "external-dns/external-dns"
+      version: "4.5.0"
+      valuesFile: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/external-dns/external-dns.yaml"
+      priority: -3
+      test: false
+      protected: false
+      wait: true
+
+    cert-manager:
+      namespace: "cert-manager"
+      enabled: true
+      chart: "cert-manager/cert-manager"
+      version: "v1.1.0"
+      valuesFile: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/cert-manager/cert-manager.yaml"
+      priority: -2
+      test: false
+      protected: false
+      wait: true
+      hooks:
+        postInstall: "https://raw.githubusercontent.com/awiesner4/argo-helmsman-poc/main/helm_values/cert-manager/le-issuer-dns.yaml"

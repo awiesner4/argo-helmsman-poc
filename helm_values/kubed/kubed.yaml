@@ -1,0 +1,13 @@
+operator:
+  registry: harbor.starburstdata.net/starburstdata
+  repository: kubed
+  tag: v0.13.0-beta.0-44-gd24bd079_linux_amd64
+
+imagePullSecrets:
+  - name: dockercredentials
+
+config:
+  clusterName: kops.infra.devops.starburstdata.net
+
+enableAnalytics: false
+
